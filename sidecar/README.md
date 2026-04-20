@@ -103,14 +103,18 @@ Or copy the `dstack_sidecar/` package into your project directly. No required de
 Minimal example:
 
 ```python
-from dstack_sidecar import DstackSidecar
+from dstack_sidecar import DstackSidecar, PowerAsymmetry
 
 # Configure the sidecar
 sidecar = DstackSidecar(
-    storage_path="./dstack_memory.db",   # SQLite path; or None for in-memory
-    gate_threshold=0.21,                  # fractal_mem_cache activation gate
-    substrate_profile="general",          # for et_tu_brute bias profile
+    gate_threshold=0.21,                              # fractal_mem_cache activation gate (default)
+    tier_budget=1000,                                 # NORMAL tier slot budget (default)
+    substrate_profile="general",                      # et_tu_brute bias profile: hex / lattice / cag / grounded / general
+    default_power_asymmetry=PowerAsymmetry.PEER_TO_PEER,  # default relational-context calibration
 )
+# NOTE: v0.1 runs in-memory only. The Storage / InMemoryStorage / SQLiteStorage
+# classes under dstack_sidecar.storage are scaffolds for adopters wiring their
+# own persistence layer. See LIMITATIONS.md for what is scaffolded vs operational.
 
 # Pre-inference
 context = sidecar.pre_inference(query="what did we discuss last week?")
@@ -159,9 +163,27 @@ The `core.py` coordinator exposes the three public methods (`pre_inference`, `po
 ## What this sidecar is not
 
 - **Not a replacement for claude-mem.** Compatible with claude-mem, via the `claude_mem-adapter.md` reference doc. Can layer discipline on top without replacing.
-- **Not a vector database.** No embeddings, no cosine similarity. Retrieval is walk-through-tier-structured-observations.
-- **Not production-grade storage.** v0.1 ships with in-memory and minimal SQLite. For serious persistence, plug in your own storage implementing the `Storage` protocol.
+- **Not a vector database.** No embeddings, no cosine similarity. The default `similarity_scorer` is trivial token-overlap -- sensible for demos, not for production. Adopters supply their own scorer via the `similarity_scorer` constructor argument on `MemCache`.
+- **Not production-grade storage.** v0.1 ships with in-memory and a minimal SQLite skeleton. For serious persistence, plug in your own storage implementing the `Storage` protocol.
 - **Not a framework.** Designed to be dropped in alongside an existing system. No opinions about which host you use.
+
+## A note on version numbers
+
+- **Dstack** is at **v1.1** (the research-program version, tracked in the repo-level `README.md` and `LIMITATIONS.md`).
+- **`dstack_sidecar`** (this Python package) is at **v0.1.0** (tracked in `pyproject.toml` and `dstack_sidecar.__version__`).
+
+These are independent. The research version describes the artifact you are reading as a whole (skills + sidecar + governance). The package version describes this Python package specifically, which is at an early-alpha state per `LIMITATIONS.md`.
+
+## A note on `bias_scan.py` applied to this repo
+
+If you run `python skills/et_tu_brute/tools/bias_scan.py . --target hex` against the repo itself, you will see roughly ten flags. All of them are expected false-positives of the duality-collapse kind documented in `skills/et_tu_brute/reference/bias-pattern-catalogue.md` §3.1:
+
+- Python ternary expressions (`x if cond else y`) matching the "naked binary" regex
+- The scanner's own pattern library string literals matching its own regexes (the scanner can't distinguish "uses `matmul`" from "documents what to flag about `matmul`")
+- Prose references in `LIMITATIONS.md` and `README.md` to concepts the scanner flags (e.g., the word "embedding" appearing in an explanation of what the skill does *not* require)
+- The `@DustyBasic` GitHub handle matching the `@<Capital>` regex
+
+No genuine drift in v1.1 was found during the pre-release audit. The false-positives are themselves a live demonstration of the duality-collapse pattern the skill documents.
 
 ---
 
