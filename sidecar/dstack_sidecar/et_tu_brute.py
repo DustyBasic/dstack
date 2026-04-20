@@ -22,7 +22,7 @@ from typing import Any, Dict, List, Optional
 # ---------------------------------------------------------------------------
 
 KNOWN_PROFILES: Dict[str, Dict[str, Any]] = {
-    "sept": {
+    "hex": {
         "description": "Hexadecimal codebase -- default to flag is binary float/matrix.",
         "bias_tokens": [
             r"\bfloat32\b", r"\bfloat64\b", r"\bnp\.float",
@@ -36,7 +36,7 @@ KNOWN_PROFILES: Dict[str, Dict[str, Any]] = {
         "bias_tokens": [
             r"\bmatmul\b", r"\beinsum\b",
             r"\btorch\.matmul\b", r"\bnp\.dot\b",
-            r"\bsoftmax\b(?!_sept)", r"\bcosine_similarity\b",
+            r"\bsoftmax\b(?!_hex)", r"\bcosine_similarity\b",
         ],
     },
     "cag": {

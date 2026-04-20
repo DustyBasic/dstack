@@ -44,7 +44,7 @@ Build an inference loop that walks a query against a weight lattice and produces
 
 **Step B  --  Walk the lattice.**
 - Default form: `torch.matmul(query_emb, weight_matrix)`
-- Target form: `for node in chain_walk(query_sept, weight_lattice): score = hex_dot_lut(query_sept, node.sept)`
+- Target form: `for node in chain_walk(query_hex, weight_lattice): score = hex_dot_lut(query_hex, node.hex)`
 - Drift risk: the inner loop feels slow compared to matmul; temptation to "batch with einsum" silently replaces chain-walk with matrix contraction
 
 **Step C  --  Accumulate scores.**
@@ -59,7 +59,7 @@ Build an inference loop that walks a query against a weight lattice and produces
 
 **Step E  --  Emit output.**
 - Default form: `return top_k_indices(scores, k=1)`
-- Target form: `return walk_output_chain(best_sept_match)`  --  decode the sept match back to output space via the output chain
+- Target form: `return walk_output_chain(best_hex_match)`  --  decode the hex match back to output space via the output chain
 - Drift risk: treating scores as purely numeric loses the chain-walk output semantics
 
 ### 3.3 Drift points at-a-glance
@@ -119,7 +119,7 @@ Correction: the map has one sequence with an explicit "applies at all scales" ma
 
 ## 6. Writing the map in the target vocabulary
 
-The map itself should use target-substrate language. A map that says "tokenize the query" is still in default vocabulary even if the implementation says `hex_encode_query`. The map's language should be `"sept-encode the query using the hex-ASCII table"`  --  target-vocabulary in the naming itself.
+The map itself should use target-substrate language. A map that says "tokenize the query" is still in default vocabulary even if the implementation says `hex_encode_query`. The map's language should be `"hex-encode the query using the hex-ASCII table"`  --  target-vocabulary in the naming itself.
 
 This is subtle but important. A map written in default vocabulary trains the agent's internal model in default vocabulary for this task; the code written against the map inherits the default framing even when the implementation calls target-vocabulary functions.
 

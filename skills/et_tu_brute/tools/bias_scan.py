@@ -10,7 +10,7 @@ USAGE
     python bias_scan.py <directory> --target <profile>
 
 PROFILES
-    sept       -- septenary codebase; flags float/matmul/embedding tokens
+    hex        -- hexadecimal / LUT-arithmetic codebase; flags float/matmul/embedding tokens
     lattice    -- lattice-walk codebase; flags matrix-multiplication tokens
     cag        -- cache-augmented-generation codebase; flags RAG/embedding tokens
     grounded   -- grounded-interface codebase; flags binary-framing tokens
@@ -22,7 +22,7 @@ wrong.  Both require human judgement.  The purpose is to surface drift
 points for review, not to replace review.
 
 EXAMPLE
-    python bias_scan.py ./src --target sept
+    python bias_scan.py ./src --target hex
     python bias_scan.py ./src --target custom --bias-file my_biases.txt
 
 LICENSE
@@ -42,29 +42,29 @@ from pathlib import Path
 # ---------------------------------------------------------------------------
 
 PROFILES = {
-    "sept": {
+    "hex": {
         "description": "Hexadecimal / LUT-arithmetic codebase -- default vocabulary to flag is binary float/matrix.",
         "bias_tokens": [
             # float arithmetic defaults
             r"\bfloat32\b", r"\bfloat64\b", r"\bnp\.float", r"\btorch\.float",
             r"\bmath\.sqrt\b", r"\bmath\.sin\b", r"\bmath\.cos\b", r"\bmath\.exp\b",
             # matrix ops
-            r"\bmatmul\b", r"\beinsum\b", r"\bdot\b(?!_sept)", r"@(?=\s*[A-Z][a-zA-Z_])",
+            r"\bmatmul\b", r"\beinsum\b", r"\bdot\b(?!_hex)", r"@(?=\s*[A-Z][a-zA-Z_])",
             # tensor libraries
             r"import torch\b", r"import numpy\b", r"\btf\.keras\b", r"\btensor\b",
             # embedding-based retrieval
             r"\bcosine_similarity\b", r"\bembedding\b", r"\bvector_store\b",
             # binary collapse
-            r"\bif .+ else\b(?!.*(sept|seven|SEPT|SEVEN))",  # only flag naked binary
+            r"\bif .+ else\b(?!.*(hex|HEX|nibble|NIBBLE))",  # only flag naked binary
         ],
-        "suggestion": "Consider lookup-table (LUT) operations, sept-native arithmetic, role-aware slot bands.",
+        "suggestion": "Consider lookup-table (LUT) operations, hex-native arithmetic, role-aware slot bands.",
     },
     "lattice": {
         "description": "Lattice-walk codebase -- default to flag is matrix multiplication.",
         "bias_tokens": [
             r"\bmatmul\b", r"\beinsum\b", r"@(?=\s*[A-Z][a-zA-Z_])",
             r"\btorch\.matmul\b", r"\bnp\.dot\b",
-            r"\bsoftmax\b(?!_sept)", r"\bcosine_similarity\b",
+            r"\bsoftmax\b(?!_hex)", r"\bcosine_similarity\b",
         ],
         "suggestion": "Consider graph/lattice traversal, page-walk retrieval, structured node-to-node hops.",
     },
@@ -172,7 +172,8 @@ def main():
     )
     parser.add_argument("directory", help="Directory to scan.")
     parser.add_argument("--target", choices=list(PROFILES.keys()) + ["custom"], required=True,
-                        help="Target-vocabulary profile.  'custom' requires --bias-file.")
+                        help="Target-vocabulary profile. 'custom' requires --bias-file. "
+                             "Available built-ins: hex, lattice, cag, grounded.")
     parser.add_argument("--bias-file", help="Path to a file of custom bias tokens (one regex per line).")
     parser.add_argument("--extensions", default=".py,.js,.ts,.jsx,.tsx,.ps1,.sh,.md",
                         help="Comma-separated file extensions to scan.  Default: common source types.")

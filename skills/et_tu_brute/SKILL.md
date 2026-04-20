@@ -60,7 +60,7 @@ The skill is useful in proportion to how well the known biases are catalogued. C
 | Fractal same-pattern-at-every-scale | Different code for each scale | Writes session-logic separate from archive-logic |
 | Append-only WAL | In-place update | Reaches for `UPDATE`, overwrites |
 | Physical-order pairing | Insertion-order pairing | Pairs by `i`, `i+1` instead of by weight ordinal |
-| Sept LUT ops | Float approximation of hex ops | Reaches for `math.sin`, `math.sqrt` instead of LUT table |
+| Hex LUT ops | Float approximation of hex ops | Reaches for `math.sin`, `math.sqrt` instead of LUT table |
 | Causal-integrity Iron Law | Quick-fix-first habit | Reaches for `--force`, `--no-verify`, `rm -rf` as first response |
 
 Extend the catalogue as new biases surface. The list is the skill's operational asset.
@@ -100,7 +100,7 @@ Only after the map is complete. Write the code following the map directly. If du
 
 After writing, run a scan for default-vocabulary leakage:
 
-- Search the implementation for the default-vocabulary tokens from your known-bias catalogue (examples: `matmul`, `torch`, `cosine_similarity`, `embedding`, `float32` in a sept codebase)
+- Search the implementation for the default-vocabulary tokens from your known-bias catalogue (examples: `matmul`, `torch`, `cosine_similarity`, `embedding`, `float32` in a hex codebase)
 - Review the implementation against the map  --  is every step in the target vocabulary?
 - If any gaps or drift found, mark them, correct them, and note the pattern for the catalogue
 
