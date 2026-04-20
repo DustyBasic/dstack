@@ -1,0 +1,37 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+*.egg-info/
+.pytest_cache/
+.venv/
+venv/
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# SQLite (from sidecar adopters testing in-place)
+*.db
+*.sqlite
+*.sqlite3
+dstack_memory.*
+
+# Secrets and credentials (defensive -- nothing of the kind should be here)
+.env
+.env.*
+secrets.*
+*.pem
+*.key
+
+# Local notes
+_local_*
+TODO_local.*

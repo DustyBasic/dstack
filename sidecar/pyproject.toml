@@ -1,0 +1,38 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dstack_sidecar"
+version = "0.1.0"
+description = "Plugin sidecar operationalizing the Dstack three-skill loop (fractal_mem_cache, grounded_interface, et_tu_brute)"
+readme = "README.md"
+requires-python = ">=3.9"
+authors = [{name = "Dusty Hankewich"}]
+license = {text = "All rights reserved -- source-available for review and evaluation"}
+keywords = ["agent", "memory", "llm", "cache", "dstack"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+
+# No required dependencies beyond the Python standard library.
+# SQLite ships with Python. Everything else is optional.
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest>=7.0"]
+
+[project.urls]
+Homepage = "https://github.com/DustyBasic/dstack"
+Documentation = "https://github.com/DustyBasic/dstack/blob/main/sidecar/README.md"
+Author = "https://dustycreative.substack.com"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["dstack_sidecar*"]
