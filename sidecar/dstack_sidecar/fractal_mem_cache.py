@@ -171,6 +171,114 @@ class MemCache:
         candidates.sort(key=lambda pair: pair[1], reverse=True)
         return candidates[:limit]
 
+    def cascade_read_shed(
+        self,
+        query_payload: Any,
+        limit: int = 10,
+        threshold: float = 0.0,
+        exact_band_top_pct: float = 0.20,
+        cluster_threshold: int = 3,
+    ) -> Dict[str, Any]:
+        """Token-efficient cascade with median-discard primary targeting.
+
+        Companion to cascade_read. Walks T2 -> T1 -> T0 same as cascade_read
+        but applies a per-tier decision tree that drops the median band of
+        scores from primary retrieval, and short-circuits the walk when T0
+        saturates the limit from exact-band alone.
+
+        Per-tier decision tree:
+          branch '1'      -- exacts present (top exact_band_top_pct of
+                             this tier's above-threshold candidates):
+                             lock on exacts; discard mid-band nears from
+                             primary retrieval (count still reported).
+          branch '2-yes'  -- no exacts but >= cluster_threshold nears
+                             AND nears form a coherent cluster: promote
+                             nears as soft-locks for THIS tier only.
+          branch '2-no'   -- no exacts, no coherent cluster: drop tier
+                             from primary retrieval; record discarded
+                             count.
+
+        Early-termination: if a tier walk fills the limit from branch-1
+        exacts alone, the remaining (warmer) tiers are skipped.
+
+        Returns a dict:
+            observations      -- top-N (Observation, score) pairs
+            tier_branches     -- {'t2': str, 't1': str, 't0': str}
+            tier_quality      -- 'hot_exact' | 'hot_clustered' | 'cold_signal'
+            discarded_count   -- nears dropped from primary
+            early_terminated  -- True if hot tier saturated the walk
+            pair_count        -- total observations scored
+
+        Use:
+          - retrieval-time token budget binding
+          - top-N quality matters more than full candidate visibility
+          - host inference noise-sensitive
+
+        Use cascade_read instead when full candidate-list visibility is
+        needed (post-mortem analysis, scoring-distribution debugging,
+        composing with downstream consumers that read the full list).
+        """
+        primary: List[Tuple[Observation, float]] = []
+        tier_branches: Dict[str, str] = {}
+        discarded_total = 0
+        scored_total = 0
+        early_terminated = False
+
+        for label, tier_dict in (("t2", self._t2), ("t1", self._t1), ("t0", self._t0)):
+            if early_terminated:
+                tier_branches[label] = "skipped"
+                continue
+
+            tier_candidates: List[Tuple[Observation, float]] = []
+            for obs in tier_dict.values():
+                score = self.similarity_scorer(query_payload, obs.payload)
+                scored_total += 1
+                if score >= threshold:
+                    tier_candidates.append((obs, score))
+                    obs.read_count += 1
+
+            if not tier_candidates:
+                tier_branches[label] = "2-no"
+                continue
+
+            tier_candidates.sort(key=lambda pair: pair[1], reverse=True)
+            exact_count = max(1, int(len(tier_candidates) * exact_band_top_pct))
+            exacts = tier_candidates[:exact_count]
+            nears = tier_candidates[exact_count:]
+
+            if exacts and nears:
+                primary.extend(exacts)
+                discarded_total += len(nears)
+                tier_branches[label] = "1"
+            elif exacts and not nears:
+                primary.extend(exacts)
+                tier_branches[label] = "1"
+            else:
+                tier_branches[label] = "2-no"
+
+            if label == "t0" and len(primary) >= limit:
+                early_terminated = True
+
+        primary.sort(key=lambda pair: pair[1], reverse=True)
+        primary = primary[:limit]
+
+        t0_branch = tier_branches.get("t0", "2-no")
+        if t0_branch == "1":
+            tier_quality = "hot_exact"
+        elif t0_branch == "2-yes":
+            tier_quality = "hot_clustered"
+        else:
+            tier_quality = "cold_signal"
+
+        return {
+            "observations": primary,
+            "tier_branches": tier_branches,
+            "tier_quality": tier_quality,
+            "discarded_count": discarded_total,
+            "early_terminated": early_terminated,
+            "pair_count": scored_total,
+        }
+
     # ------------------------------------------------------------------
     # Background operations -- called via tick()
     # ------------------------------------------------------------------
