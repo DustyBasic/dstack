@@ -2,7 +2,7 @@
 
 Honest accounting of what this version does, what it does not yet do, and what adopters should verify themselves before depending on it.
 
-Written at v1.0 (initial public release). Expect this file to be updated as subsequent versions ship.
+Written at v1.0; updated at v1.3 to reflect `cascade_read_shed`. Expect further updates as subsequent versions ship.
 
 ---
 
@@ -10,7 +10,7 @@ Written at v1.0 (initial public release). Expect this file to be updated as subs
 
 These components are implemented, tested, and working end-to-end. The `sidecar/examples/basic_usage.py` example exercises all of them:
 
-- **`fractal_mem_cache`** -- 3-tier temporal cache (T2 / T1 / T0), 4-role tagging (NORMAL / REL / T_CELL / NEG_T), 21% activation gate with directional open-only behavior, T-CELL patrol emission, NEG-T contradiction detection, tier-promotion rules (read-count / age / capacity / REL-reference triangulation)
+- **`fractal_mem_cache`** -- 3-tier temporal cache (T2 / T1 / T0), 4-role tagging (NORMAL / REL / T_CELL / NEG_T), 21% activation gate with directional open-only behavior, T-CELL patrol emission, NEG-T contradiction detection, tier-promotion rules (read-count / age / capacity / REL-reference triangulation). v1.3 adds `cascade_read_shed` as opt-in token-efficient companion to `cascade_read` -- per-tier decision tree drops mid-band noise from primary retrieval; public API of `cascade_read` unchanged.
 - **`grounded_interface`** -- continuity baseline comparison, phase-state registry with deprecation warnings, translation-loss signal detection, relational-context calibration with power-asymmetry-aware language bias
 - **`et_tu_brute`** -- bias-naming protocol (step 1), target-vocabulary mapping guidance (step 2, documented), drift-scan patterns (step 4), bias catalogue with 9 seeded entries including the duality-collapse entry
 - **Sidecar coordinator** -- `pre_inference()`, `post_inference()`, `background_tick()` as the series+parallel loop
@@ -64,7 +64,7 @@ Items under consideration for v1.1+:
 - Extended translation-loss signal library
 - Performance benchmarks for realistic workloads
 
-No commitment on timing. The research program underneath continues; Dstack will get the public-safe slice of each next layer when it makes sense to publish.
+No commitment on timing. Items ship as they're ready.
 
 ---
 
