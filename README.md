@@ -12,6 +12,33 @@ Together these form a triad: **what the agent remembers** (substrate), **how the
 
 ---
 
+## The dstack family
+
+`dstack` is one component of a wider family of cognitive-architecture tools
+derived from the same independent research program. The published family
+includes:
+
+- **[`dstack`](https://github.com/DustyBasic/dstack)** (this repo) — three-skill family for agent systems (substrate / engagement / cognitive hygiene)
+- **[`graphic_memory`](https://github.com/DustyBasic/graphic_memory)** — cross-session observation substrate speaking native operator vocabulary
+- **[`Interspace`](https://github.com/DustyBasic/Interspace)** — HTML graph rendering with live discovery runners for any node/edge/cluster JSON
+
+Each repo is fully usable standalone. **Compounding gains only emerge when
+integrated as the full dstack family**: dstack's skills hold the continuity
+and substrate discipline; graphic_memory accumulates the corrections those
+skills surface as cross-session observations; Interspace renders the
+accumulated substrate as a navigable lattice where the patterns become
+visible and live runners discover new bindings across the corpus.
+
+Integration happens at the vocabulary layer, not at runtime — each tool
+speaks the same native operator vocabulary (vertex, ruler, slide-rule, fold,
+press-and-recover, immature-vs-earned absolute, lane-crossing, etc.), so
+their outputs compose without translation overhead. Install each per its
+own README; the integration emerges from sharing the underlying terms.
+
+All three repos publish under the same rights posture: source-available for
+review and evaluation, all rights reserved, no license granted by the act
+of publication. See `Rights and use` below for the full posture.
+
 ## Why Dstack
 
 Most agent tooling treats memory as *retrieval* (RAG) or *preload* (CAG) and treats interaction as *prompt engineering*. Dstack treats both as **structured disciplines** with governance behind them:
